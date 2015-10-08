@@ -3,6 +3,15 @@ package io.feedback
 import rx.lang.scala.Observable
 
 /**
+ * TimeSeries represents a collection of uniformly spaced data points.
+ *
+ * @param label a identifier for the series
+ * @param steps The number of elements in `data`.
+ * @param data A stream of doubles which represent the data set.
+ */
+case class TimeSeries(label: String, size: Int, data: Observable[Double])
+
+/**
  * A `PlotSource` serves as input to a `Plot`.
  */
 trait PlotSource {
@@ -19,6 +28,8 @@ trait PlotSource {
    */
   def steps: Int
 
+  final def time: Observable[Int] = Observable.from(0 to steps)
+
   /**
    * Setpoint for controller at `step`. This allows
    * a step function implementation the setpoint.
@@ -26,9 +37,15 @@ trait PlotSource {
   def setpoint(step: Int): Double
 
   /**
-   * The data for this controller. Each observed value represents
-   * a single pass through the controller. Plots read no more
-   * than `steps` events emitted by this observable.
+   * The process output that we are observing.
    */
   def data: Observable[Double]
+
+  /**
+   * A collection of [[TimeSeries]] to plot.
+   */
+  def series: Seq[TimeSeries] = Seq(
+    TimeSeries("setpoint", steps, time.map(setpoint(_).toDouble)),
+    TimeSeries(yLabel, steps, data)
+  )
 }

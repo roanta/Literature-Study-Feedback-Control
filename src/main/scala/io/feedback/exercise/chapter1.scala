@@ -38,7 +38,7 @@ class BufferOpenLoop extends PlotSource {
 
   def setpoint(step: Int) = 5.0
 
-  def data = {
+  def data: Observable[Double] = {
     val buffer = new Buffer(10, 10)
     Observable.from(0 to steps)
       .map(setpoint)

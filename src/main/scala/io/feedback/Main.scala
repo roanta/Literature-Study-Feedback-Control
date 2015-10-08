@@ -8,8 +8,9 @@ import io.feedback.exercise._
 
 class Viz extends Application {
   val simulations: Seq[Plot] = Seq(
-    Plot.fromSource(new BufferOpenLoop),
-    Plot.fromSource(new BufferClosedLoop)
+    Plot(new LoadBandClosedLoop)
+    // Plot.fromSource(new BufferOpenLoop),
+    // Plot.fromSource(new BufferClosedLoop)
   )
 
   def start(stage: Stage) = {
