@@ -8,6 +8,7 @@ import io.feedback.exercise._
 
 class Viz extends Application {
   val simulations: Seq[Plot] = Seq(
+    Plot(new PidApertureClosedLoop),
     Plot(new LoadBandClosedLoop)
     // Plot.fromSource(new BufferOpenLoop),
     // Plot.fromSource(new BufferClosedLoop)

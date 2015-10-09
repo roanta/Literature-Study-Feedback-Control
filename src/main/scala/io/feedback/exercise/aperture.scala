@@ -11,8 +11,15 @@ import rx.lang.scala.subjects.BehaviorSubject
  */
 case class Aperture(min: Int, max: Int) {
   private[this] var aperture = 1
-  def widen(): Unit = aperture += 1
-  def narrow(): Unit = aperture -= 1
+  def widen(): Int = incr(1D)
+  def narrow(): Int = incr(-1D)
+  def incr(by: Double): Int = {
+    val i = math.round(aperture + by).toInt
+    if (i > max) aperture = max
+    else if (i < min) aperture = min
+    else aperture = i
+    aperture
+  }
   def value: Int = aperture
 }
 
@@ -91,7 +98,7 @@ class LoadBandClosedLoop extends PlotSource {
 
   def data: Observable[Double] = {
     val plant = Aperture(min = 1, max = 50)
-    val loadGen = Load(maxBurst = 20)
+    val loadGen = Load(maxBurst = 5)
     val ema = Ema(window = 5L)
 
     // The input into the plant is the average load and the output is the
@@ -101,9 +108,9 @@ class LoadBandClosedLoop extends PlotSource {
     // 0 = dead zone
     // 1 = on / widen
     def control(avgLoad: Double): Unit = {
-      if (avgLoad >= highLoad && plant.value < plant.max)
+      if (avgLoad >= highLoad)
         plant.widen()
-      else if (avgLoad <= lowLoad && plant.value > plant.min)
+      else if (avgLoad <= lowLoad)
         plant.narrow()
     }
 
@@ -119,4 +126,43 @@ class LoadBandClosedLoop extends PlotSource {
     TimeSeries("low load", steps, time.map(_ => lowLoad)),
     TimeSeries("high load", steps, time.map(_ => highLoad))
   )
+}
+
+class PidApertureClosedLoop extends PlotSource {
+  val seriesLabel = "PID aperture controller"
+  val yLabel = "avg load"
+
+  val steps = 1000
+
+  def setpoint(step: Int) = 1.0
+
+  def data = Observable[Double] { s =>
+    val plant = Aperture(min = 1, max = 50)
+    val loadGen = Load(maxBurst = 5)
+    val ema = Ema(window = 5L)
+
+    val kp = 1.5
+    val ki = 0.05
+    val kd = 0.5
+
+    def control(e: Double, ie: Double, de: Double, dt: Double = 1.0): Double =
+      kp*e + ki*ie*dt + kd*(de/dt)
+
+    val avg = BehaviorSubject(0.0)
+    avg.subscribe(s)
+
+    val pid = time.map(setpoint).zipWith(avg)(_ - _).scan((0.0, 0.0, 0.0)) {
+      case ((prev, ie, _), e) => (e, e + ie, e - prev)
+    }
+
+    time.zipWith(pid)((_, _)).map { case (step, (e, ie, de)) =>
+      // We have an inverted input/output relationship.
+      // That is, if the avg load is below our setpoint, we
+      // want to decrease our aperture and vice versa.
+      val adjustment = control(e, ie, de) * -1
+      val aperture = plant.incr(adjustment)
+      val load = loadGen.step().toDouble
+      ema.update(step, load / aperture)
+    }.subscribe(avg)
+  }
 }
