@@ -8,10 +8,13 @@ import io.feedback.exercise._
 
 class Viz extends Application {
   val simulations: Seq[Plot] = Seq(
-    Plot(new PidApertureClosedLoop),
-    Plot(new LoadBandClosedLoop)
+    // Plot(new PidApertureClosedLoop),
+    // Plot(new LoadBandClosedLoop)
     // Plot.fromSource(new BufferOpenLoop),
     // Plot.fromSource(new BufferClosedLoop)
+    Plot(new AdmissionControlPlot(new OverloadPlant, AdmissionController.Identity)),
+    Plot(new AdmissionControlPlot(new OverloadPlant, new StandardController)),
+    Plot(new AdmissionControlPlot(new OverloadPlant, new StandardController(90)))
   )
 
   def start(stage: Stage) = {

@@ -45,7 +45,7 @@ trait PlotSource {
    * A collection of [[TimeSeries]] to plot.
    */
   def series: Seq[TimeSeries] = Seq(
-    TimeSeries("setpoint", steps, time.map(setpoint(_).toDouble)),
+    TimeSeries("setpoint", steps, time.map(setpoint(_))),
     TimeSeries(yLabel, steps, data)
   )
 }
