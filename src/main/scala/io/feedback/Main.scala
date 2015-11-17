@@ -7,14 +7,18 @@ import javafx.stage.Stage
 import io.feedback.exercise._
 
 class Viz extends Application {
+  val overloadServer = new OverloadServer
+  val slowdownServer = new SlowdownServer
+
   val simulations: Seq[Plot] = Seq(
     // Plot(new PidApertureClosedLoop),
     // Plot(new LoadBandClosedLoop)
     // Plot.fromSource(new BufferOpenLoop),
     // Plot.fromSource(new BufferClosedLoop)
-    Plot(new AdmissionControlPlot(new OverloadPlant, AdmissionController.Identity)),
-    Plot(new AdmissionControlPlot(new OverloadPlant, new StandardController)),
-    Plot(new AdmissionControlPlot(new OverloadPlant, new StandardController(90)))
+    Plot(new AdmissionControlPlot(overloadServer, new IdentityController(overloadServer))),
+    Plot(new AdmissionControlPlot(overloadServer, new StandardController(overloadServer))),
+    Plot(new AdmissionControlPlot(slowdownServer, new IdentityController(slowdownServer))),
+    Plot(new AdmissionControlPlot(overloadServer, new StandardController(slowdownServer)))
   )
 
   def start(stage: Stage) = {
