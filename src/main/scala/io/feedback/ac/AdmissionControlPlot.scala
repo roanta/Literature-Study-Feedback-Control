@@ -12,7 +12,7 @@ class AdmissionControlPlot(plant: Server, controller: AdmissionController) exten
   def setpoint(step: Int): Double = 0.0
 
   // allowRate, throttled, maxLoad
-  val observe = Observable[(Double, Double, MaxHealthLoad)] { s =>
+  def data = Observable[(Double, Double, MaxHealthLoad)] { s =>
     val subject = BehaviorSubject((100.0, 0.0, MaxHealthLoad.Init))
     subject.subscribe(s)
 
@@ -22,12 +22,7 @@ class AdmissionControlPlot(plant: Server, controller: AdmissionController) exten
     }.subscribe(subject)
   }
 
-  def data = observe.map(_._2)
-
-  override def series = super.series ++ Seq(
-    TimeSeries("allow rate", steps, observe.map(_._1)),
-    TimeSeries("max healthy load", steps, observe.map(_._3.v))
-  )
+  def series: TimeSeries = TimeSeries(Array("rate limit", "throttle", "max healty load"), steps, data)
 }
 
 class WindowedUtil(window: Int) {

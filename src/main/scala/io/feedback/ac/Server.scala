@@ -5,9 +5,9 @@ import scala.util.Random
 object Server {
   val assingedCores: Int = 2
   val physicalCores: Int = 4
-  // throttling time based on assigned number of cores in one step
+  // throttling time based on assigned number of cores
   val lowWatermark = assingedCores * 25
-  // the maximum throttling time in one step
+  // the maximum throttling time
   val highWatermark = physicalCores * 25
 }
 
@@ -38,14 +38,14 @@ trait Server {
 class OverloadServer extends Server{
   import Server._
 
-  private[this] val rng = new Random
+  private[this] val rng = new Random(12345678)
   val name = "overload"
 
   /**
     * Increase throttling with load
     *
     * load [0, 90), no throttling
-    * load [90, 100), randomly no throttling or a small amount of throttling
+    * load [90, 100), randomly between no throttling and a small amount of throttling
     * load [100, 300), grows from 0 to lowWatermark throttling
     * load [300, Infinity), grows from lowWatermark to highWatermark throttling
     *
@@ -90,7 +90,8 @@ class SlowdownServer extends Server{
       if (step < 20) 0.0
       // more and more throttling
       else if (step < 50) lowWatermark/30 * (step - 20)
-      else if (step < 60) (highWatermark - lowWatermark)/10 * (step - 50) + lowWatermark
+      else if (step < 70) (highWatermark - lowWatermark)/20 * (step - 50) + lowWatermark
+      else if (step < 80) highWatermark
       // goes back to normal
       else 0.0
     }

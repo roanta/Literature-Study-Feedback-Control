@@ -5,11 +5,11 @@ import rx.lang.scala.Observable
 /**
  * TimeSeries represents a collection of uniformly spaced data points.
  *
- * @param label a identifier for the series
- * @param steps The number of elements in `data`.
+ * @param labels a identifier for the series
+ * @param size The number of elements in `data`.
  * @param data A stream of doubles which represent the data set.
  */
-case class TimeSeries(label: String, size: Int, data: Observable[Double])
+case class TimeSeries(labels: Array[String], size: Int, data: Observable[(Double, Double, MaxHealthLoad)])
 
 /**
  * A `PlotSource` serves as input to a `Plot`.
@@ -39,13 +39,7 @@ trait PlotSource {
   /**
    * The process output that we are observing.
    */
-  def data: Observable[Double]
+  def data: Observable[(Double, Double, MaxHealthLoad)]
 
-  /**
-   * A collection of [[TimeSeries]] to plot.
-   */
-  def series: Seq[TimeSeries] = Seq(
-    TimeSeries("setpoint", steps, time.map(setpoint(_))),
-    TimeSeries(yLabel, steps, data)
-  )
+  def series: TimeSeries
 }

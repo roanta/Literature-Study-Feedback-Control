@@ -90,7 +90,7 @@ class StandardController(plant: Server) extends AdmissionController {
     // a window of history throttling
     accumulatedThrottleNs.add(throttled)
 
-    println(s"\nstep: $step, plant load: $externalLoad, allow load: $allowedLoad, throttled: $throttled, max health load: $maxHealthyLoad")
+    println(s"\nstep: $step, load: $externalLoad, rate limit: $allowedLoad, throttled: $throttled, max health load: $maxHealthyLoad")
 
     val nextAllow =
       if (throttled == 0) {
@@ -121,8 +121,8 @@ class StandardController(plant: Server) extends AdmissionController {
           // only one throttling, no-op
           allowedLoad
         } else if (consecutiveHealthyWins >= 5 && consecutiveThrottlingWins == 2) {
-          // allow rate drop to history max
           isHealthy = false
+          // allow rate drop to history max
           maxHealthyLoad.v
         } else {
           val throttledSum = accumulatedThrottleNs.getSum
@@ -142,7 +142,7 @@ class StandardController(plant: Server) extends AdmissionController {
 
     // update max health load
     val nextMaxLoad =
-      if (isHealthy) {
+      if (throttled == 0) {
         // if current load > history max, or history max is too old
         if (processedLoad > maxHealthyLoad.v || step - maxHealthyLoad.step >= 10) {
           println(s"update max to: $processedLoad")
