@@ -14,10 +14,10 @@ class Viz extends Application {
     // Plot(new LoadBandClosedLoop)
     // Plot.fromSource(new BufferOpenLoop),
     // Plot.fromSource(new BufferClosedLoop)
-    //Plot(new AdmissionControlPlot(overloadServer, new IdentityController(overloadServer))),
-    //Plot(new AdmissionControlPlot(overloadServer, new StandardController(overloadServer))),
-    //Plot(new AdmissionControlPlot(slowdownServer, new IdentityController(slowdownServer))),
-    //Plot(new AdmissionControlPlot(slowdownServer, new StandardController(slowdownServer)))
+    Plot(new AdmissionControlPlot(overloadServer, new StandardController(overloadServer))),
+    Plot(new AdmissionControlPlot(overloadServer, new IdentityController(overloadServer))),
+    Plot(new AdmissionControlPlot(slowdownServer, new IdentityController(slowdownServer))),
+    Plot(new AdmissionControlPlot(slowdownServer, new StandardController(slowdownServer)))
   )
 
   def start(stage: Stage) = {

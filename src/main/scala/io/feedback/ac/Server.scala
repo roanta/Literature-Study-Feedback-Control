@@ -38,7 +38,7 @@ trait Server {
 class OverloadServer extends Server{
   import Server._
 
-  private[this] val rng = new Random(12345678)
+  private[this] val rng = new Random("seed".hashCode)
   val name = "overload"
 
   /**
